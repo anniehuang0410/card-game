@@ -71,3 +71,17 @@
 #header .tried {
   margin-top: 0;
 }
+
+.wrong {
+  animation-name: wrongAmination;
+  animation-duration: 0.2s; /* 動畫(逐漸加入黃色邊框)要持續 0.2 秒 */
+  animation-iteration-count: 5; /* 動畫要重覆 5 次 */
+}
+
+/* CSS 現成動畫工具 - 關鍵影格 */
+@keyframes wrongAmination {
+  /* 用 from 和 to 來指定動畫漸變起點和終點 (這邊 from 為空) */
+  to {
+    border: 2px solid #ffd54f;
+  }
+}

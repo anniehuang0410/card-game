@@ -92,6 +92,15 @@ const view = {
   // 計算配對次數
   renderTriedTimes(times) {
     document.querySelector('.tried').textContent = `You've tried: ${times} times`
+  },
+  // 加入配對失敗動畫
+  appendWrongAnimation(...cards) {
+    cards.map(card => {
+      card.classList.add('wrong')
+      card.addEventListener('animationend', event => { // 動畫結束事件 (animationend)
+        card.classList.remove('wrong'), { once: true } // 在事件執行一次之後，就要卸載這個監聽器
+      })
+    }) 
   }
 }
 
@@ -143,6 +152,7 @@ const controller = {
         } else {
           // 狀態四：配對失敗
           this.currentState = GAME_STATE.cardMatchFailed
+          view.appendWrongAnimation(...model.revealedCards)
           setTimeout(this.resetCards, 1000) 
         }
         break 
