@@ -66,20 +66,24 @@ const view = {
     rootElement.innerHTML = indexes.map(index => this.getCardElement(index)).join('')
   },
   // 翻卡動作
-  flipCard(card) {
-    if(card.classList.contains('back')) {
-      // 回傳正面
-      card.classList.remove('back')
-      card.innerHTML = this.getCardContent(Number(card.dataset.index))
-      return
-    }
-    // 回傳背面
-    card.classList.add('back')
-    card.innerHTML = null
+  flipCards(...cards) { // 如有多個卡片都可以同時執行此函式
+    cards.map(card => {
+      if (card.classList.contains('back')) {
+        // 回傳正面
+        card.classList.remove('back')
+        card.innerHTML = this.getCardContent(Number(card.dataset.index))
+        return
+      }
+      // 回傳背面
+      card.classList.add('back')
+      card.innerHTML = null
+    })
   },
   // 配對成功者樣式變化
-  pairedCards(card) {
-    card.classList.add('paired')
+  pairedCards(...cards) {
+    cards.map(card => {
+      card.classList.add('paired')
+    })
   }
 }
 
@@ -109,36 +113,35 @@ const controller = {
     switch (this.currentState) {
       // 狀態一：：等待翻第一張牌
       case GAME_STATE.firstCardAwaits:
-        view.flipCard(card)
+        view.flipCards(card)
         model.revealedCards.push(card)
         this.currentState = GAME_STATE.secondCardAwaits
         break // 這個動作暫停，但下面的函式可以繼續運行
       // 狀態二：：等待翻第二張牌
       case GAME_STATE.secondCardAwaits:
-        view.flipCard(card)
+        view.flipCards(card)
         model.revealedCards.push(card)
         // 判斷是否配對成功
         if (model.isRevealedCardsMatched()) {
           // 狀態三：配對成功
           this.currentState = GAME_STATE.cardMatched
-          view.pairedCards(model.revealedCards[0])
-          view.pairedCards(model.revealedCards[1])
+          view.pairedCards(...model.revealedCards)
           model.revealedCards = []
           this.currentState = GAME_STATE.firstCardAwaits
         } else {
           // 狀態四：配對失敗
           this.currentState = GAME_STATE.cardMatchFailed
-          setTimeout(() => {
-            view.flipCard(model.revealedCards[0])
-            view.flipCard(model.revealedCards[1])
-            model.revealedCards = []
-            this.currentState = GAME_STATE.firstCardAwaits
-          }, 1000)
+          setTimeout(this.resetCards, 1000) 
         }
         break 
     }
     console.log('this.currentState', this.currentState)
     console.log('revealedCards', model.revealedCards.map(card => card.dataset.index))
+  },
+  resetCards() {
+    view.flipCards(...model.revealedCards)
+    model.revealedCards = []
+    controller.currentState = GAME_STATE.firstCardAwaits // 此時要將前綴改成 controller，如為 this 則指向 setTimeout
   }
 }
 controller.generateCards()
