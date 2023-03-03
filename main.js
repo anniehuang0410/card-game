@@ -84,6 +84,14 @@ const view = {
     cards.map(card => {
       card.classList.add('paired')
     })
+  },
+  // 計算分數
+  renderScore(score) {
+    document.querySelector('.score').textContent = `Score: ${score}`
+  },
+  // 計算配對次數
+  renderTriedTimes(times) {
+    document.querySelector('.tried').textContent = `You've tried: ${times} times`
   }
 }
 
@@ -93,7 +101,9 @@ const model = {
   // 檢查翻開的牌是否配對
   isRevealedCardsMatched() {
     return this.revealedCards[0].dataset.index % 13 === this.revealedCards[1].dataset.index % 13
-  }
+  },
+  score: 0,
+  triedTimes: 0
 }
 
 const controller = {
@@ -119,12 +129,14 @@ const controller = {
         break // 這個動作暫停，但下面的函式可以繼續運行
       // 狀態二：：等待翻第二張牌
       case GAME_STATE.secondCardAwaits:
+        view.renderTriedTimes(++model.triedTimes)
         view.flipCards(card)
         model.revealedCards.push(card)
         // 判斷是否配對成功
         if (model.isRevealedCardsMatched()) {
           // 狀態三：配對成功
           this.currentState = GAME_STATE.cardMatched
+          view.renderScore(model.score += 10)
           view.pairedCards(...model.revealedCards)
           model.revealedCards = []
           this.currentState = GAME_STATE.firstCardAwaits
