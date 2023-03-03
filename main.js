@@ -101,6 +101,18 @@ const view = {
         card.classList.remove('wrong'), { once: true } // 在事件執行一次之後，就要卸載這個監聽器
       })
     }) 
+  },
+  // 遊戲結束畫面
+  showGameFinished() {
+    const div = document.createElement('div')
+    div.classList.add('completed')
+    div.innerHTML = `
+    <p>Completed!</p>
+    <p>Score: ${model.score}</p>
+    <p>You've tried: ${model.triedTimes} times</p>
+    `
+    const header = document.querySelector('#header')
+    header.before(div)
   }
 }
 
@@ -148,6 +160,12 @@ const controller = {
           view.renderScore(model.score += 10)
           view.pairedCards(...model.revealedCards)
           model.revealedCards = []
+          // 如分數達 260 即結束
+          if (model.score === 260) {
+            this.currentState = GAME_STATE.gameFinished
+            view.showGameFinished()
+            return
+          }
           this.currentState = GAME_STATE.firstCardAwaits
         } else {
           // 狀態四：配對失敗
